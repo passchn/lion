@@ -15,12 +15,15 @@ availability of the popup.
 ```js script
 import { LitElement, html, repeat } from '@mdjs/mdjs-preview';
 import { listboxData, listboxComplexData } from '../listbox/src/listboxData.js';
-import { LionCombobox } from '@lion/ui/combobox.js';
+import { LionCombobox, IsMatchingAnOption } from '@lion/ui/combobox.js';
+import { Required } from '@lion/ui/form-core.js';
 import '@lion/ui/define/lion-combobox.js';
 import '@lion/ui/define/lion-option.js';
 import './src/demo-selection-display.js';
 import { lazyRender } from './src/lazyRender.js';
 import levenshtein from './src/levenshtein.js';
+import { loadDefaultFeedbackMessages } from '@lion/ui/validate-messages.js';
+loadDefaultFeedbackMessages();
 ```
 
 ## Autocomplete
@@ -227,6 +230,33 @@ export const multipleChoice = () => html`
       ),
     )}
   </lion-combobox>
+`;
+```
+
+## Validation
+
+The combobox works with a `Required` validator to check if it is empty. To make sure the value matches an option you can use the `IsMatchingAnOption` validator.
+
+This only works if `requireOptionMatch` is set to false.
+
+```js preview-story
+class DemoValidation extends LionCombobox {
+  constructor() {
+    super();
+    this.requireOptionMatch = false;
+  }
+}
+customElements.define('demo-validation', DemoValidation);
+export const validation = () => html`
+  <demo-validation
+    name="combo"
+    label="Validation"
+    .validators=${[new Required(), new IsMatchingAnOption()]}
+  >
+    ${lazyRender(
+      listboxData.map(entry => html` <lion-option .choiceValue="${entry}">${entry}</lion-option> `),
+    )}
+  </demo-validation>
 `;
 ```
 

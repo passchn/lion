@@ -38,6 +38,9 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
         type: Boolean,
         attribute: 'show-all-on-empty',
       },
+      requireOptionMatch: {
+        type: Boolean,
+      },
       __shouldAutocompleteNextUpdate: Boolean,
     };
   }
@@ -139,6 +142,43 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
       },
       ...super.localizeNamespaces,
     ];
+  }
+
+  /**
+   * @override ChoiceGroupMixin
+   */
+  // @ts-ignore
+  get modelValue() {
+    if (!this.requireOptionMatch) {
+      if (this.multipleChoice) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "multipleChoice and requireOptionMatch=false can't be used at the same time yet.",
+        );
+      } else {
+        const elems = this._getCheckedElements();
+        if (elems[0]) {
+          return elems[0].choiceValue;
+        }
+        return this._inputNode?.value || '';
+      }
+    }
+    return super.modelValue;
+  }
+
+  // Duplicating from ChoiceGroupMixin, because you cannot independently inherit/override getter + setter.
+  // If you override one, gotta override the other, they go in pairs.
+  /**
+   * @override ChoiceGroupMixin
+   */
+  set modelValue(value) {
+    super.modelValue = value;
+  }
+
+  reset() {
+    super.reset();
+    // @ts-ignore
+    this._inputNode.value = this._initialModelValue;
   }
 
   /**
@@ -256,7 +296,7 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
    * @protected
    */
   get _inputNode() {
-    if (this._ariaVersion === '1.1') {
+    if (this._ariaVersion === '1.1' && this._comboboxNode) {
       return /** @type {HTMLInputElement} */ (this._comboboxNode.querySelector('input'));
     }
     return /** @type {HTMLInputElement} */ (this._comboboxNode);
@@ -327,7 +367,10 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
      * By default, the listbox closes on empty, similar to wai-aria example and <datalist>
      */
     this.showAllOnEmpty = false;
-
+    /**
+     * If set to false, the value is allowed to not match any of the options
+     */
+    this.requireOptionMatch = true;
     /**
      * @configure ListboxMixin: the wai-aria pattern and <datalist> rotate
      */
@@ -557,7 +600,10 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
    */
   // eslint-disable-next-line class-methods-use-this
   _getTextboxValueFromOption(option) {
-    return option.choiceValue;
+    if (option && option.choiceValue) {
+      return option.choiceValue;
+    }
+    return this.modelValue;
   }
 
   /**
@@ -814,7 +860,8 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
 
           if (isInlineAutoFillCandidate) {
             const textboxValue = this._getTextboxValueFromOption(option);
-            const stringValues = typeof textboxValue === 'string' && typeof curValue === 'string';
+            const stringValues =
+              textboxValue && typeof textboxValue === 'string' && typeof curValue === 'string';
             const beginsWith =
               stringValues && textboxValue.toLowerCase().indexOf(curValue.toLowerCase()) === 0;
             // We only can do proper inline autofilling when the beginning of the word matches
