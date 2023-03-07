@@ -600,10 +600,7 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
    */
   // eslint-disable-next-line class-methods-use-this
   _getTextboxValueFromOption(option) {
-    if (option && option.choiceValue) {
-      return option.choiceValue;
-    }
-    return this.modelValue;
+    return option?.choiceValue || this.modelValue;
   }
 
   /**
