@@ -587,6 +587,14 @@ export class LionCombobox extends LocalizeMixin(OverlayMixin(LionListbox)) {
     if (ev.key === 'Tab') {
       this.opened = false;
     }
+    if (ev.key === 'ArrowLeft') {
+      const currentPosition = this._inputNode.selectionStart || 1;
+      this._inputNode.setSelectionRange(currentPosition - 1, currentPosition - 1);
+    }
+    if (ev.key === 'ArrowRight') {
+      const currentPosition = this._inputNode.selectionStart || 0;
+      this._inputNode.setSelectionRange(currentPosition + 1, currentPosition + 1);
+    }
   }
 
   /**

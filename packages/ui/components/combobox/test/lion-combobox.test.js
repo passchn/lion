@@ -2487,6 +2487,89 @@ describe('lion-combobox', () => {
     });
   });
 
+  describe('Interaction', () => {
+    describe('on textbox', () => {
+      it('keydown of ArrowLeft keys moves the caret to the left', async () => {
+        const el = /** @type {LionCombobox} */ (
+          await fixture(html`
+            <lion-combobox name="foo">
+              <lion-option .choiceValue="${'Artichoke'}">Artichoke</lion-option>
+              <lion-option .choiceValue="${'Chard'}">Chard</lion-option>
+              <lion-option .choiceValue="${'Chicory'}">Chicory</lion-option>
+              <lion-option .choiceValue="${'Victoria Plum'}">Victoria Plum</lion-option>
+            </lion-combobox>
+          `)
+        );
+        const { _inputNode } = getComboboxMembers(el);
+
+        mimicUserTyping(el, 'ch');
+        await el.updateComplete;
+        expect(_inputNode.value).to.equal('Chard');
+        expect(_inputNode.selectionStart).to.equal('Ch'.length);
+        expect(_inputNode.selectionEnd).to.equal('Chard'.length);
+
+        mimicKeyPress(_inputNode, 'ArrowLeft');
+        await el.updateComplete;
+        expect(_inputNode.selectionStart).to.equal('C'.length);
+        expect(_inputNode.selectionEnd).to.equal('C'.length);
+
+        // It doesn't go below the 0 (which will put the caret to the end of the value)
+        mimicKeyPress(_inputNode, 'ArrowLeft');
+        mimicKeyPress(_inputNode, 'ArrowLeft');
+        await el.updateComplete;
+        expect(_inputNode.selectionStart).to.equal(0);
+        expect(_inputNode.selectionEnd).to.equal(0);
+      });
+
+      it('keydown of ArrowRight keys moves the caret to the right', async () => {
+        const el = /** @type {LionCombobox} */ (
+          await fixture(html`
+            <lion-combobox name="foo">
+              <lion-option .choiceValue="${'Artichoke'}">Artichoke</lion-option>
+              <lion-option .choiceValue="${'Chard'}">Chard</lion-option>
+              <lion-option .choiceValue="${'Chicory'}">Chicory</lion-option>
+              <lion-option .choiceValue="${'Victoria Plum'}">Victoria Plum</lion-option>
+            </lion-combobox>
+          `)
+        );
+        const { _inputNode } = getComboboxMembers(el);
+
+        mimicUserTyping(el, 'ch');
+        await el.updateComplete;
+        expect(_inputNode.value).to.equal('Chard');
+        expect(_inputNode.selectionStart).to.equal('Ch'.length);
+        expect(_inputNode.selectionEnd).to.equal('Chard'.length);
+
+        mimicKeyPress(_inputNode, 'ArrowRight');
+        await el.updateComplete;
+        expect(_inputNode.selectionStart).to.equal('Cha'.length);
+        expect(_inputNode.selectionEnd).to.equal('Cha'.length);
+      });
+
+      it('keydown of arrow keys do not change the modelValue', async () => {
+        const el = /** @type {LionCombobox} */ (
+          await fixture(html`
+            <lion-combobox name="foo">
+              <lion-option .choiceValue="${'Artichoke'}">Artichoke</lion-option>
+              <lion-option .choiceValue="${'Chard'}">Chard</lion-option>
+              <lion-option .choiceValue="${'Chicory'}">Chicory</lion-option>
+              <lion-option .choiceValue="${'Victoria Plum'}">Victoria Plum</lion-option>
+            </lion-combobox>
+          `)
+        );
+        const { _inputNode } = getComboboxMembers(el);
+
+        mimicUserTyping(el, 'ch');
+        await el.updateComplete;
+        expect(el.modelValue).to.equal('Chard');
+
+        mimicKeyPress(_inputNode, 'ArrowRight');
+        await el.updateComplete;
+        expect(el.modelValue).to.equal('Chard');
+      });
+    });
+  });
+
   describe('Accessibility', () => {
     describe('Aria versions', () => {
       it('[role=combobox] wraps input node in v1.1', async () => {
