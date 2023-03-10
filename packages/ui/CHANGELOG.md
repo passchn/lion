@@ -1,5 +1,11 @@
 # @lion/ui
 
+## 0.1.6
+
+### Patch Changes
+
+- 42a463ee: Set padding of <dialog> to 0 so it doesn't show a weird 1em width/height box due to user agent styles.
+
 ## 0.1.5
 
 ### Patch Changes
